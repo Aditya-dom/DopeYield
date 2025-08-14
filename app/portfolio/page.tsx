@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import ConnectWalletButton from '../components/ConnectWalletButton';
 import { useAccount } from 'wagmi';
 
-const DashboardPage = () => {
+const PortfolioPage = () => {
   const [selectedTimeframe, setSelectedTimeframe] = useState('7d');
   const [claimableAmount, setClaimableAmount] = useState(245.67);
   const { address, isConnected } = useAccount();
@@ -74,24 +74,20 @@ const DashboardPage = () => {
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Background Effects */}
       <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black"></div>
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-600/10 via-transparent to-transparent"></div>
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-purple-600/10 via-transparent to-transparent"></div>
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-600/15 via-transparent to-transparent"></div>
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-blue-600/15 via-transparent to-transparent"></div>
       
       <div className="relative z-10 container mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            {/* DopeYield Branding */}
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 rounded-2xl mr-4 flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl mr-4 flex items-center justify-center shadow-lg">
 
               </div>
-              <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  DopeYield
+                              <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                  DopeYield Portfolio
                 </h1>
-                <p className="text-gray-400 text-sm">Smart yield optimization for maximum gains</p>
-              </div>
             </div>
             
             {/* Enhanced Wallet Connection */}
@@ -323,4 +319,4 @@ const DashboardPage = () => {
   );
 };
 
-export default DashboardPage;
+export default PortfolioPage;
