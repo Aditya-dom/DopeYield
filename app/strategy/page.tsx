@@ -1,43 +1,76 @@
 'use client';
 
 import React, { useState } from 'react';
+import ConnectWalletButton from '../components/ConnectWalletButton';
+import { useAccount } from 'wagmi';
 
 const StrategyPage = () => {
-  const [selectedStrategy, setSelectedStrategy] = useState('AXAL');
+  const [selectedStrategy, setSelectedStrategy] = useState('BetterYield');
+  const { address, isConnected } = useAccount();
 
   const strategies = [
     {
-      name: 'Timelock',
-      title: 'BetterYield',
+      name: 'BetterYield',
+      title: 'Tier 1 Stablecoin Strategy',
       apy: '9%',
       description: 'Tier 1 stablecoin lending markets',
       risk: 'Low',
       tvl: '$126.7M',
       selected: true
+    }
+  ];
+
+  // DopeYield Vaults data
+  const vaults = [
+    {
+      id: 'dopeyield-usdt',
+      name: 'DopeYield USDT',
+      token: 'USDT',
+      userDeposits: 0.00,
+      totalDeposits: '101.76M',
+      supplyApy: '13.89%',
+      protocols: ['Aave', 'Compound', 'Morpho', 'Euler', 'Seamless'],
+      rewardCount: '+3'
     },
     {
-      name: 'U.S. Treasury Bills',
-      apy: '5%',
-      description: 'Government-backed securities',
-      risk: 'Very Low',
-      tvl: '$2.4B',
-      selected: false
+      id: 'dopeyield-ultra-hype',
+      name: 'DopeYield Ultra HYPE',
+      token: 'HYPE',
+      userDeposits: 0.00,
+      totalDeposits: '44.15M',
+      supplyApy: '6.00%',
+      protocols: ['Aave', 'Compound', 'Morpho', 'Euler'],
+      rewardCount: '+4'
     },
     {
-      name: 'Robinhood Gold',
-      apy: '4%',
-      description: 'High-yield savings account',
-      risk: 'Very Low',
-      tvl: '$850M',
-      selected: false
+      id: 'dopeyield-xaut',
+      name: 'DopeYield XAUt',
+      token: 'XAUt',
+      userDeposits: 0.00,
+      totalDeposits: '1.48M',
+      supplyApy: '3.33%',
+      protocols: ['Aave'],
+      rewardCount: '+1'
     },
     {
-      name: 'U.S. Savings Account',
-      apy: '0.5%',
-      description: 'Traditional banking',
-      risk: 'None',
-      tvl: 'N/A',
-      selected: false
+      id: 'dopeyield-ultra-ubtc',
+      name: 'DopeYield Ultra UBTC',
+      token: 'UBTC',
+      userDeposits: 0.00,
+      totalDeposits: '22.34M',
+      supplyApy: '2.50%',
+      protocols: ['Aave', 'Compound'],
+      rewardCount: '+2'
+    },
+    {
+      id: 'dopeyield-1sthype',
+      name: 'DopeYield 1stHYPE',
+      token: '1stHYPE',
+      userDeposits: 0.00,
+      totalDeposits: '7.79M',
+      supplyApy: '1.98%',
+      protocols: ['Aave', 'Compound', 'Morpho', 'Euler'],
+      rewardCount: '+1'
     }
   ];
 
@@ -48,7 +81,6 @@ const StrategyPage = () => {
       type: 'Vault',
       percent: '35%',
       apy: '10.62%',
-      logo: '🔷',
       allocation: 35
     },
     {
@@ -57,7 +89,6 @@ const StrategyPage = () => {
       type: 'Vault',
       percent: '35%',
       apy: '10.57%',
-      logo: '🔷',
       allocation: 35
     },
     {
@@ -66,10 +97,17 @@ const StrategyPage = () => {
       type: 'Vault', 
       percent: '30%',
       apy: '7.90%',
-      logo: '⚡',
       allocation: 30
     }
   ];
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2
+    }).format(amount);
+  };
 
   const getRiskColor = (risk: string) => {
     switch(risk) {
@@ -86,8 +124,8 @@ const StrategyPage = () => {
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Background Effects */}
       <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black"></div>
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-600/20 via-transparent to-transparent"></div>
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-purple-600/20 via-transparent to-transparent"></div>
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-600/15 via-transparent to-transparent"></div>
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-blue-600/15 via-transparent to-transparent"></div>
       
       <div className="relative z-10 container mx-auto px-6 py-8">
         {/* Header */}
@@ -95,27 +133,28 @@ const StrategyPage = () => {
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center">
               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl mr-4 flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">◊</span>
+
               </div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                Yield Protocol
+                DopeYield Protocol
               </h1>
             </div>
             
             {/* Stats Bar */}
             <div className="hidden lg:flex items-center space-x-8">
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">$2.4B</div>
+                <div className="text-2xl font-bold text-white">$593.5M</div>
                 <div className="text-sm text-gray-400">Total TVL</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-400">9.97%</div>
+                <div className="text-2xl font-bold text-green-400">12.18%</div>
                 <div className="text-sm text-gray-400">Avg APY</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-400">4</div>
-                <div className="text-sm text-gray-400">Strategies</div>
+                <div className="text-2xl font-bold text-blue-400">5</div>
+                <div className="text-sm text-gray-400">Active Vaults</div>
               </div>
+              <ConnectWalletButton />
             </div>
           </div>
         </div>
@@ -195,7 +234,7 @@ const StrategyPage = () => {
 
           {/* Right Column - Strategy Details */}
           <div className="xl:col-span-7">
-            {/* Axal Prime Header */}
+            {/* BetterYield Header */}
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-3xl p-8 border border-gray-700/50 mb-8">
               <div className="flex items-center justify-between mb-6">
                 <div>
@@ -205,9 +244,6 @@ const StrategyPage = () => {
                   <p className="text-gray-300 text-lg">
                     Earn up to <span className="text-green-400 font-bold">9.78%</span> APY through Tier 1 stablecoin lending markets for USDC.
                   </p>
-                </div>
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
-                  <span className="text-2xl">💎</span>
                 </div>
               </div>
 
@@ -245,6 +281,85 @@ const StrategyPage = () => {
                   <div className="text-3xl font-bold text-green-400 mb-1">9.97%</div>
                   <div className="text-sm text-gray-400">Last 7D: 9.79%</div>
                 </div>
+              </div>
+            </div>
+
+            {/* DopeYield Vaults Table */}
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-3xl p-8 border border-gray-700/50 mb-8">
+              <h3 className="text-2xl font-bold text-white mb-6">DopeYield Vaults</h3>
+              
+              {/* Table Header */}
+              <div className="grid grid-cols-5 gap-4 mb-6 pb-4 border-b border-gray-700/50">
+                <div className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+                  Vault
+                </div>
+                <div className="text-sm font-semibold text-gray-400 uppercase tracking-wider text-right">
+                  Your Deposits
+                </div>
+                <div className="text-sm font-semibold text-gray-400 uppercase tracking-wider text-right">
+                  Total Deposits
+                </div>
+                <div className="text-sm font-semibold text-gray-400 uppercase tracking-wider text-right">
+                  Supply APY
+                </div>
+                <div className="text-sm font-semibold text-gray-400 uppercase tracking-wider text-center">
+                  Action
+                </div>
+              </div>
+
+              {/* Vault Rows */}
+              <div className="space-y-3">
+                {vaults.map((vault, index) => (
+                  <div
+                    key={vault.id}
+                    className="grid grid-cols-5 gap-4 items-center p-4 rounded-xl border border-gray-700/30 hover:border-gray-600/50 hover:bg-gray-800/30 transition-all duration-200"
+                  >
+                    {/* Vault Name */}
+                    <div className="font-semibold text-white text-sm">{vault.name}</div>
+
+                    {/* Your Deposits */}
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-white">
+                        {formatCurrency(vault.userDeposits)}
+                      </div>
+                    </div>
+
+                    {/* Total Deposits */}
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-white">
+                        ${vault.totalDeposits}
+                      </div>
+                    </div>
+
+                    {/* Supply APY */}
+                    <div className="text-right">
+                      <div className="flex items-center justify-end space-x-2">
+                        <span className="text-lg font-bold text-green-400">
+                          {vault.supplyApy}
+                        </span>
+                        <div className="w-5 h-5 bg-green-500/20 rounded flex items-center justify-center">
+                          <svg className="w-3 h-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
+                    <div className="flex justify-center">
+                      <button 
+                        className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
+                          isConnected 
+                            ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                            : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                        }`}
+                        disabled={!isConnected}
+                      >
+                        {isConnected ? 'DEPOSIT' : 'CONNECT'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -342,22 +457,8 @@ const StrategyPage = () => {
                   
                   {protocolData.map((protocol, index) => (
                     <div key={index} className="grid grid-cols-4 gap-4 items-center py-4 rounded-xl hover:bg-gray-700/30 transition-colors duration-200 group">
-                      <div className="flex items-center">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 ${
-                          index === 0 ? 'bg-blue-500/20 text-blue-400' :
-                          index === 1 ? 'bg-purple-500/20 text-purple-400' :
-                          'bg-green-500/20 text-green-400'
-                        }`}>
-                          {protocol.logo}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-white text-sm group-hover:text-blue-400 transition-colors">
-                            {protocol.name.replace(' USDC', '')}
-                          </div>
-                          <div className="text-xs text-gray-400">
-                            {protocol.token}
-                          </div>
-                        </div>
+                      <div className="font-semibold text-white text-sm group-hover:text-blue-400 transition-colors">
+                        {protocol.name.replace(' USDC', '')}
                       </div>
                       <div className="text-center">
                         <span className="text-sm px-2 py-1 bg-gray-700/50 rounded-lg text-gray-300">
@@ -396,34 +497,6 @@ const StrategyPage = () => {
               </button>
             </div>
 
-            {/* Performance Chart Preview */}
-            <div className="mt-8 bg-gray-800/50 backdrop-blur-sm rounded-3xl p-8 border border-gray-700/50">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-white">Performance History</h3>
-                <div className="flex space-x-2">
-                  <button className="px-3 py-1 text-sm rounded-lg bg-blue-600 text-white">7D</button>
-                  <button className="px-3 py-1 text-sm rounded-lg bg-gray-700 text-gray-300 hover:bg-gray-600">30D</button>
-                  <button className="px-3 py-1 text-sm rounded-lg bg-gray-700 text-gray-300 hover:bg-gray-600">90D</button>
-                </div>
-              </div>
-              
-              {/* Simple Chart Visualization */}
-              <div className="h-32 flex items-end space-x-2 mb-4">
-                {[65, 72, 68, 78, 85, 82, 90, 88, 95, 97, 94, 99, 97].map((height, index) => (
-                  <div 
-                    key={index}
-                    className="flex-1 bg-gradient-to-t from-blue-600 to-purple-500 rounded-t-sm opacity-80 hover:opacity-100 transition-opacity"
-                    style={{ height: `${height}%` }}
-                  ></div>
-                ))}
-              </div>
-              
-              <div className="flex justify-between text-sm text-gray-400">
-                <span>7 days ago</span>
-                <span>Today</span>
-              </div>
-            </div>
-
             {/* Risk Information */}
             <div className="mt-8 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 backdrop-blur-sm rounded-3xl p-8 border border-yellow-500/30">
               <div className="flex items-start">
@@ -445,7 +518,7 @@ const StrategyPage = () => {
             {/* Disclaimer */}
             <div className="mt-8 p-6 bg-gray-900/50 rounded-2xl border border-gray-700/30">
               <p className="text-xs text-gray-400 leading-relaxed">
-                <span className="font-semibold text-gray-300">Disclaimer:</span> The content provided by Yield Protocol is intended for informational and educational purposes only. 
+                <span className="font-semibold text-gray-300">Disclaimer:</span> The content provided by DopeYield Protocol is intended for informational and educational purposes only. 
                 This is not financial advice. Cryptocurrency investments are subject to market risk and price volatility. 
                 Users should conduct their own research and consult with financial advisors before making investment decisions.
               </p>
@@ -456,16 +529,16 @@ const StrategyPage = () => {
         {/* Mobile Stats Bar */}
         <div className="lg:hidden mt-12 grid grid-cols-3 gap-4">
           <div className="bg-gray-800/50 rounded-2xl p-4 text-center border border-gray-700/50">
-            <div className="text-xl font-bold text-white">$2.4B</div>
+            <div className="text-xl font-bold text-white">$593.5M</div>
             <div className="text-sm text-gray-400">Total TVL</div>
           </div>
           <div className="bg-gray-800/50 rounded-2xl p-4 text-center border border-gray-700/50">
-            <div className="text-xl font-bold text-green-400">9.97%</div>
+            <div className="text-xl font-bold text-green-400">12.18%</div>
             <div className="text-sm text-gray-400">Avg APY</div>
           </div>
           <div className="bg-gray-800/50 rounded-2xl p-4 text-center border border-gray-700/50">
-            <div className="text-xl font-bold text-blue-400">4</div>
-            <div className="text-sm text-gray-400">Strategies</div>
+            <div className="text-xl font-bold text-blue-400">5</div>
+            <div className="text-sm text-gray-400">Active Vaults</div>
           </div>
         </div>
       </div>

@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import ConnectWalletButton from '../components/ConnectWalletButton';
+import { useAccount } from 'wagmi';
 
 const DashboardPage = () => {
   const [selectedTimeframe, setSelectedTimeframe] = useState('7d');
   const [claimableAmount, setClaimableAmount] = useState(245.67);
+  const { address, isConnected } = useAccount();
 
   // Mock data for user positions
   const positions = [
@@ -16,7 +19,7 @@ const DashboardPage = () => {
       apy: 10.62,
       earned: 142.33,
       strategy: 'BetterYield',
-      icon: '🔷',
+
       color: 'blue',
       change24h: +2.3
     },
@@ -28,7 +31,7 @@ const DashboardPage = () => {
       apy: 7.90,
       earned: 89.12,
       strategy: 'Stable Yield',
-      icon: '⚡',
+
       color: 'green',
       change24h: +1.8
     },
@@ -40,7 +43,7 @@ const DashboardPage = () => {
       apy: 12.45,
       earned: 0.34,
       strategy: 'ETH Yield',
-      icon: '🟣',
+
       color: 'purple',
       change24h: -0.5
     }
@@ -78,28 +81,21 @@ const DashboardPage = () => {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
+            {/* DopeYield Branding */}
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 rounded-xl mr-4 flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">◊</span>
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 rounded-2xl mr-4 flex items-center justify-center shadow-lg">
+
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-                <p className="text-gray-400 text-sm">One dashboard, all things yield</p>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  DopeYield
+                </h1>
+                <p className="text-gray-400 text-sm">Smart yield optimization for maximum gains</p>
               </div>
             </div>
             
-            {/* Network & Wallet Info */}
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center bg-gray-800/50 rounded-xl px-4 py-2 border border-gray-700/50">
-                <div className="w-6 h-6 bg-blue-500 rounded-full mr-2 flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">Ξ</span>
-                </div>
-                <span className="text-sm text-gray-300">Ethereum</span>
-              </div>
-              <div className="bg-gray-800/50 rounded-xl px-4 py-2 border border-gray-700/50">
-                <span className="text-sm text-gray-300">0x69c2...0d22</span>
-              </div>
-            </div>
+            {/* Enhanced Wallet Connection */}
+            <ConnectWalletButton />
           </div>
         </div>
 
@@ -237,7 +233,7 @@ const DashboardPage = () => {
                             position.color === 'green' ? 'bg-green-500/20 text-green-400' :
                             'bg-purple-500/20 text-purple-400'
                           }`}>
-                            {position.icon}
+                            <span className="text-sm font-bold">{position.protocol.charAt(0)}</span>
                           </div>
                           <div>
                             <div className="font-semibold text-white">{position.protocol}</div>
