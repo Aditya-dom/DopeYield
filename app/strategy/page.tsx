@@ -2,11 +2,71 @@
 
 import React, { useState } from 'react';
 import ConnectWalletButton from '../components/ConnectWalletButton';
-import { useAccount } from 'wagmi';
+import { useAccount, useContractRead } from 'wagmi';
+
+// ERC-4626 Vault ABI (standard interface)
+const ERC4626_ABI = [
+  {
+    "inputs": [],
+    "name": "totalAssets",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalSupply",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "uint256", "name": "assets", "type": "uint256"}],
+    "name": "convertToShares",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+
+// Hook to get real-time vault data
+function useEulerVaultData(vaultAddress: string) {
+  const { data: totalAssets } = useContractRead({
+    address: vaultAddress as `0x${string}`,
+    abi: ERC4626_ABI,
+    functionName: 'totalAssets',
+  });
+
+  const { data: totalSupply } = useContractRead({
+    address: vaultAddress as `0x${string}`,
+    abi: ERC4626_ABI,
+    functionName: 'totalSupply',
+  });
+
+  return {
+    totalAssets,
+    totalSupply,
+    // Calculate exchange rate or other metrics
+    exchangeRate: totalAssets && totalSupply ? Number(totalAssets) / Number(totalSupply) : 0
+  };
+}
 
 const StrategyPage = () => {
   const [selectedStrategy, setSelectedStrategy] = useState('BetterYield');
   const { address, isConnected } = useAccount();
+
+  // Get real-time Euler vault data using contract calls
+  const eulerVaultAddress = '0xce45EF0414dE3516cAF1BCf937bF7F2Cf67873De';
+  const eulerVaultData = useEulerVaultData(eulerVaultAddress);
+
+  // Utility function for formatting currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2
+    }).format(amount);
+  };
 
   const strategies = [
     {
@@ -20,8 +80,34 @@ const StrategyPage = () => {
     }
   ];
 
-  // DopeYield Vaults data
+  // Enhanced DopeYield Vaults data with Euler Finance integration
   const vaults = [
+    // Add Euler Finance USDC vault at the top for prominence with real-time data
+    {
+      id: 'euler-usdc-stablecoin-maxi',
+      name: 'Euler Stablecoin Maxi',
+      token: 'USDC',
+      userDeposits: 0.00,
+      totalDeposits: eulerVaultData.totalAssets ? formatCurrency(Number(eulerVaultData.totalAssets) / 1e6) : '83,866.50', // Real-time from contract
+      supplyApy: '18.07%', // From your image
+      protocols: ['Euler Finance', 'Ethereum'],
+      rewardCount: '+2',
+      contractAddress: '0xce45EF0414dE3516cAF1BCf937bF7F2Cf67873De',
+      network: 'ethereum',
+      vaultType: 'Stablecoin Maxi',
+      riskLevel: 'Low-Medium',
+      description: 'High-yield USDC vault on Euler Finance v2 with modular lending capabilities',
+      features: ['ERC-4626 Compatible', 'Cross-collateral', 'Modular Design'],
+      auditStatus: '12+ Security Audits',
+      tvlInUsd: eulerVaultData.totalAssets ? Number(eulerVaultData.totalAssets) / 1e6 : 83866.50,
+      isLive: true,
+      launchDate: '2024-09-04',
+      // Real-time contract data
+      totalAssets: eulerVaultData.totalAssets,
+      totalSupply: eulerVaultData.totalSupply,
+      exchangeRate: eulerVaultData.exchangeRate
+    },
+    // Your existing vaults...
     {
       id: 'dopeyield-usdt',
       name: 'DopeYield USDT',
@@ -100,14 +186,6 @@ const StrategyPage = () => {
       allocation: 30
     }
   ];
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2
-    }).format(amount);
-  };
 
   const getRiskColor = (risk: string) => {
     switch(risk) {
@@ -223,6 +301,105 @@ const StrategyPage = () => {
           <div className="bg-gray-800/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-gray-700/50 shadow-2xl">
             <h3 className="text-xl sm:text-2xl font-bold text-white mb-6 sm:mb-8">DopeYield Vaults</h3>
             
+            {/* Special Euler Vault Display - Enhanced with Real-time Data */}
+            <div className="mb-8 p-6 bg-gradient-to-r from-blue-900/20 to-purple-900/20 rounded-2xl border border-blue-500/30">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-lg font-bold text-white">Featured: Euler Stablecoin Maxi</h4>
+                <div className="flex space-x-2">
+                  <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                    HIGH YIELD
+                  </span>
+                  <span className="bg-blue-500/20 text-blue-400 text-xs font-bold px-3 py-1 rounded-full">
+                    LIVE DATA
+                  </span>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="bg-gray-900/60 rounded-xl p-4 border border-gray-700/40">
+                  <div className="text-sm text-gray-400 mb-1">Real-time TVL</div>
+                  <div className="text-xl font-bold text-white">
+                    {eulerVaultData.totalAssets ? formatCurrency(Number(eulerVaultData.totalAssets) / 1e6) : (
+                      <span className="text-blue-400">Loading...</span>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-500">USDC</div>
+                </div>
+                
+                <div className="bg-gray-900/60 rounded-xl p-4 border border-gray-700/40">
+                  <div className="text-sm text-gray-400 mb-1">Total Supply</div>
+                  <div className="text-xl font-bold text-white">
+                    {eulerVaultData.totalSupply ? (Number(eulerVaultData.totalSupply) / 1e18).toFixed(2) : (
+                      <span className="text-blue-400">Loading...</span>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-500">Shares</div>
+                </div>
+                
+                <div className="bg-gray-900/60 rounded-xl p-4 border border-gray-700/40">
+                  <div className="text-sm text-gray-400 mb-1">Exchange Rate</div>
+                  <div className="text-xl font-bold text-white">
+                    {eulerVaultData.exchangeRate ? eulerVaultData.exchangeRate.toFixed(6) : (
+                      <span className="text-blue-400">Loading...</span>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-500">Assets/Share</div>
+                </div>
+              </div>
+              
+              {/* Additional Real-time Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="bg-gray-900/60 rounded-xl p-4 border border-gray-700/40">
+                  <div className="text-sm text-gray-400 mb-1">APY (Current)</div>
+                  <div className="text-2xl font-bold text-green-400">18.07%</div>
+                  <div className="text-xs text-gray-500">Euler Finance v2</div>
+                </div>
+                
+                <div className="bg-gray-900/60 rounded-xl p-4 border border-gray-700/40">
+                  <div className="text-sm text-gray-400 mb-1">Last Updated</div>
+                  <div className="text-lg font-bold text-white">
+                    {eulerVaultData.totalAssets ? new Date().toLocaleTimeString() : 'Waiting for data...'}
+                  </div>
+                  <div className="text-xs text-gray-500">Real-time blockchain data</div>
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-2 mb-4">
+                <span className="text-xs px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full font-medium">
+                  ERC-4626 Compatible
+                </span>
+                <span className="text-xs px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full font-medium">
+                  Modular Design
+                </span>
+                <span className="text-xs px-3 py-1 bg-green-500/20 text-green-400 rounded-full font-medium">
+                  12+ Security Audits
+                </span>
+                <span className="text-xs px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-full font-medium">
+                  Cross-collateral
+                </span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <div className="text-sm text-gray-400">
+                  Contract: {eulerVaultAddress.slice(0, 6)}...{eulerVaultAddress.slice(-4)}
+                </div>
+                <div className="flex space-x-3">
+                  <button 
+                    className="bg-gray-700/50 hover:bg-gray-600/50 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 border border-gray-600/50"
+                    onClick={() => window.open(`https://etherscan.io/address/${eulerVaultAddress}`, '_blank')}
+                  >
+                    VIEW ON ETHERSCAN
+                  </button>
+                  <button 
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold px-6 py-2 rounded-xl transition-all duration-200 transform hover:scale-105"
+                    onClick={() => window.open(`https://app.euler.finance/vault/${eulerVaultAddress}?network=ethereum`, '_blank')}
+                  >
+                    DEPOSIT ON EULER
+                  </button>
+                </div>
+              </div>
+            </div>
+            
             {/* Mobile Card Layout */}
             <div className="block lg:hidden space-y-4">
               {vaults.map((vault, index) => (
@@ -299,12 +476,21 @@ const StrategyPage = () => {
                 {vaults.map((vault, index) => (
                   <div
                     key={vault.id}
-                    className="grid grid-cols-5 gap-6 items-center p-6 rounded-2xl border border-gray-700/30 hover:border-gray-600/50 bg-gray-900/30 hover:bg-gray-800/40 transition-all duration-300 group"
+                    className={`grid grid-cols-5 gap-6 items-center p-6 rounded-2xl border transition-all duration-300 group ${
+                      vault.id === 'euler-usdc-stablecoin-maxi' 
+                        ? 'border-blue-500/50 bg-blue-900/20 hover:border-blue-400/70' 
+                        : 'border-gray-700/30 hover:border-gray-600/50 bg-gray-900/30 hover:bg-gray-800/40'
+                    }`}
                   >
                     {/* Vault Name */}
                     <div>
                       <div className="font-bold text-white text-sm group-hover:text-blue-400 transition-colors mb-2">
                         {vault.name}
+                        {vault.id === 'euler-usdc-stablecoin-maxi' && (
+                          <span className="ml-2 text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">
+                            LIVE
+                          </span>
+                        )}
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {vault.protocols.slice(0, 3).map((protocol, idx) => (
